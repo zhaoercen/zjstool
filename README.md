@@ -17,4 +17,5 @@ gulp的输出目录，运行根目录下的server.exe就会启动一个小型web
 * qunit目录：<br/>
 测试js用<br/>
 * chromeExtenstion目录：<br/>
-用于google浏览器扩展，目录下的内容打包成zip后上传到google浏览器应用商店。<br/>
+用于chrome浏览器扩展，目录下的内容打包成zip后上传到chrome应用商店。<br/>
+（chrome应用商店搜索"文本替换工具"使用）
