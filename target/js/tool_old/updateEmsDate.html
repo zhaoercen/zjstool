@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<!--[if IE 7 ]><html class="ie ie7" lang="en"><![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"><![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="en">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<title>数据修改器</title>
+<link type="text/css" href="../js/jquery-ui-1.11.1.custom/jquery-ui.css"
+	rel="stylesheet">
+<style>
+body {
+	font: 60% "Trebuchet MS", sans-serif; /*设置整体字体大小 CH*/
+	font: 75% "Trebuchet MS", sans-serif\0/; /*设置整体字体大小 IE 9 10*/
+	margin: 5px; /*边距*/
+}
+
+.radioset {
+	font-size: small;
+}
+
+.z-btns {
+	font-size: small;
+}
+
+.td-top {
+	vertical-align: top;
+}
+
+.allWidth {
+	width: 100%;
+}
+
+.hint-text {
+	/*提示框风格 css注释不能用双斜线 */
+	background-color: #FFCC66;
+	border: 3px solid;
+	border-radius: 10px;
+	border-color: #FF6666;
+}
+</style>
+
+<!-- 先加载基本的js库 -->
+<script src="../js/jquery/jquery-1.8.3.js"></script>
+<script src="../js/jquery-ui-1.11.1.custom/jquery-ui.js"></script>
+<script src="../js/knockout/knockout-3.2.0.js"></script>
+
+<!-- 然后加载zjt -->
+<script src="../js/zjt/objtool.js"></script>
+<script src="../js/zjt/strtool.js"></script>
+<script src="../js/zjt/logtool.js"></script>
+<script src="../js/zjt/util.js"></script>
+
+<script>
+	$(function() {
+		ko.applyBindings(viewModel);//knockoutJs绑定
+		$("button").button();
+	});
+	
+	var viewModel = {
+		serviceUrl : ko.observable("http://emsdev.midea.com.cn:9060/ems"),
+		tableName : ko.observable("Z_TEMP"),
+		idName : ko.observable("C1"),
+		idValue : ko.observable("1"),
+		updateColumn : ko.observable("C3"),
+		updateValue : ko.observable("ok"),
+	}
+	//computed要写在后面，等viewModel先初始化。
+	viewModel.url = ko.computed(function(){return getUrl(viewModel);},viewModel);
+	viewModel.simpleUrl = ko.computed(function(){return getSimpleUrl(viewModel);},viewModel);
+	/*
+	function ViewModel(){
+		this.serviceUrl = ko.observable("http://emsdev.midea.com.cn:9060/ems");
+		this.tableName = ko.observable("Z_TEMP");
+		this.idName = ko.observable("C1");
+		this.idValue = ko.observable("1");
+		this.updateColumn = ko.observable("C3");
+		this.updateValue = ko.observable("ok");
+		this.url = ko.computed(function(){return getUrl(this);},this);
+	} */
+
+	function init() {
+	}
+	
+	//获取参数
+	function getParamData(){
+		var model = ko.toJS(viewModel);
+		delete model.serviceUrl;
+		delete model.simpleUrl;
+		delete model.url;
+		return model;
+	}
+	
+	function getSimpleUrl(vm){
+		var url = '';
+		url += vm.serviceUrl();
+		url += "/com.sie.ems.util.pub.updateTableFields.biz.ext";
+		return url;
+	}
+	function getUrl(vm){
+		var url = '';
+		url += vm.serviceUrl();
+		url += "/com.sie.ems.util.pub.updateTableFields.biz.ext?";
+		url += "tableName="+vm.tableName();
+		url += "&fieldName="+vm.updateColumn();
+		url += "&fieldValue="+vm.updateValue();
+		url += "&idName="+vm.idName();
+		url += "&idValue="+vm.idValue();
+		return url;
+	}
+	function getUrlToConsol(){//生成浏览器的链接
+		var url = '';
+		url += "emsuat2.midea.com:9060/ems";
+		url += "/com.sie.ems.util.pub.updateTableFields.biz.ext?";
+		url += "tableName=EMS_EC_FEE_INVOICE_H";
+		url += "&fieldName=IMPORT_ERP_STATUS";
+		url += "&fieldValue=CANCELLED";
+		url += "&idName=invoice_code";
+		url += "&idValue=GRF1009991604002903B";
+		return url;
+	}
+	
+	//发送请求到服务器
+	function sendHttp(){
+		var _url = $("#txt_url").val();
+		if (!document.getElementById("iframe1")){
+			var iframe = document.createElement("iframe");
+			iframe.style.display = "none";
+			iframe.id = "iframe1";
+			document.body.appendChild(iframe);
+		}
+		document.getElementById("iframe1").src = _url;
+		
+		/*
+		//document.domain="midea.com.cn";
+		var _url = $("#txt_simpleUrl").val();
+		var _asyn = false;
+		var _inParam = getParamData();
+		debugger;
+		$.ajax(
+				{
+					type : "post",
+					url : _url,
+					dataType : "json",
+					contentType: "application/json; charset=utf-8",
+					data : _inParam,
+					asyn : _asyn,
+					success : function (data){
+						alert(JSON.stringify(data));
+					},
+					error : function (jqXHR, textStatus, errorThrown){
+					}
+				}
+			);
+		*/
+	}
+	
+	function update(){
+		var msg = "请确定你已经冷静思考，并确认一定要修改数据了。\n";
+		msg += "服务器地址，表名，表ID\n";
+		msg += "---------\n";
+		msg += "请求url：\n";
+		msg += $("#txt_simpleUrl").val() +"\n";
+		msg += "---------\n";
+		msg += "请求参数：\n";
+		msg += JSON.stringify(getParamData())+"\n";
+		msg += "---------\n";
+		
+		if(confirm(msg)){
+			sendHttp();
+		}else{
+			alert("操作已取消");
+		}
+	}
+	
+	function clear(){
+	
+	}
+	
+</script>
+</head>
+<body>
+	<table>
+		<tr>
+			<td colspan="5">
+				<div class="z_lable" style="color:red;font-weight:bold;font-size:20px">修改前千万要保存原始数据！</div>
+				<input id="txt_simpleUrl" style="width:100%" data-bind="value:simpleUrl">
+				<input id="txt_url" style="width:100%" data-bind="value:url">
+			</td>
+			
+		</tr>
+		<tr>
+			<td>
+				<div class="z_lable">服务器地址</div>
+			</td>
+			<td colspan="3">
+				<input id="txt_serviceUrl" style="width:100%" data-bind="value:serviceUrl">
+			</td>
+			<td>
+				<div style="width:180px;"></div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div class="z_lable">表名</div>
+			</td>
+			<td>
+				<input id="txt_tabName" style="width:180px" data-bind="value:tableName">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div class="z_lable">ID字段名</div>
+			</td>
+			<td>
+				<input id="txt_idName" style="width:180px" data-bind="value:idName">
+			</td>
+			<td>
+				<div class="z_lable">ID字段值</div>
+			</td>
+			<td>
+				<input id="txt_idValue" style="width:180px" data-bind="value:idValue">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div class="z_lable">修改字段</div>
+			</td>
+			<td>
+				<input id="txt_updateColumn" style="width:180px" data-bind="value:updateColumn">
+			</td>
+			<td>
+				<div class="z_lable">修改字段值</div>
+			</td>
+			<td>
+				<input id="txt_updateValue" style="width:180px" data-bind="value:updateValue">
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td colspan="2" align="right">
+				<button class="z-btns" onClick="update()">确定</button>
+				<button class="z-btns" onClick="clear()" style="display:none" disabled="true">清空</button>
+			</td>
+			<td></td>
+			
+		</tr>
+	</table>	
+	
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<!--[if IE 7 ]><html class="ie ie7" lang="en"><![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"><![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="en">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<title>sqlMaker</title>
+<link type="text/css" href="../js/jquery-ui-1.11.1.custom/jquery-ui.css"
+	rel="stylesheet">
+<style>
+body {
+	font: 60% "Trebuchet MS", sans-serif; /*设置整体字体大小 CH*/
+	font: 75% "Trebuchet MS", sans-serif\0/; /*设置整体字体大小 IE 9 10*/
+	margin: 5px; /*边距*/
+}
+
+.radioset {
+	font-size: x-small;
+}
+
+.z-btns {
+	font-size: small;
+}
+
+.td-top {
+	vertical-align: top;
+}
+
+.allWidth {
+	width: 100%;
+}
+
+.z_lable{
+	font-size: medium; 
+	text-align:right;
+	display: inline-block;
+	width: 90px;
+}
+
+.hint-text {
+	/*提示框风格 css注释不能用双斜线 */
+	background-color: #FFCC66;
+	border: 3px solid;
+	border-radius: 10px;
+	border-color: #FF6666;
+}
+</style>
+
+<!-- 先加载基本的js库 -->
+<script src="../js/jquery/jquery-1.8.3.js"></script>
+<script src="../js/jquery-ui-1.11.1.custom/jquery-ui.js"></script>
+<script src="../js/knockout/knockout-3.2.0.js"></script>
+<script src="../js/jsbeautify.js"></script>
+<script src="../js/clipboard/ZeroClipboard.js"></script>
+
+<!-- 然后加载zjt -->
+<script src="../js/zjt/objtool.js"></script>
+<script src="../js/zjt/strtool.js"></script>
+<script src="../js/zjt/logtool.js"></script>
+<script src="../js/zjt/util.js"></script>
+
+<!-- 最后加载业务模块的js -->
+
+<!-- -->
+
+<script>
+	$(function() {
+		init();
+	});
+	
+	function init() {
+		$("button").button();
+	}
+	
+	function onClickBtnFormat(){
+		getFormatText();
+	}
+	
+	function onValueChanged(){
+		getFormatText();
+	}
+	
+	function getFormatText(){
+		var resultText = js_beautify($("#txa_needFormat").val());
+		$("#txa_hadFormat").val(resultText);
+	}
+	
+	function copyToClipBoard(){
+		/*初始化复制按钮*/
+		//ZeroClipboard.setMoviePath("../js/clipboard/ZeroClipboard.swf");设置flash   
+		var clip = new ZeroClipboard.Client(); //初始化对象
+		clip.setHandCursor( true ); //设置手型  
+		var _text = $("#txa_hadFormat").val();
+		clip.setText(_text); //设置需要复制的代码 
+		clip.glue( 'btn_copy'); //将flash覆盖至指定ID的DOM上 
+
+		/*
+			var clip = new ZeroClipboard.Client(); //初始化对象
+			clip.setHandCursor( true ); //设置手型  
+			var _text = $("#txa_hadFormat").val();
+			clip.setText(_text); //设置需要复制的代码 
+			clip.addEventListener( "complete", function(){    
+				alert("已经复制到剪切板！");     
+			}); 
+			clip.glue( 'btn_copy'); //将flash覆盖至指定ID的DOM上 
+		*/
+	}
+	
+	
+	
+</script>
+
+</head>
+<body>
+	<table id="allTable" style="width:100%" border="0">
+		<tr>
+			<td  valign="top" align="left">
+				<div>待格式化JavaScript：</div>
+			</td>
+		</tr>
+		<tr>
+			<td  valign="top" align="left">
+				<textarea id="txa_needFormat" rows="12" cols="120" onkeyup="onValueChanged()"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td  valign="top" align="left">
+				<button id="btn_format" class="jqueryUI-button"
+				onclick="onClickBtnFormat()">格式化</button>
+				&nbsp;
+				<button id="btn_copy" class="jqueryUI-button" style="display:none">复制格式化代码</button>
+			</td>
+		</tr>
+		<tr>
+			<td  valign="top" align="left">
+				<div>格式化的JavaScript：</div>
+			</td>
+		</tr>
+		<tr>
+			<td  valign="top" align="left">
+				<textarea id="txa_hadFormat" rows="12" cols="120" value=" "></textarea>
+			</td>
+		</tr>
+		
+	</table>
+</body>
+</html>

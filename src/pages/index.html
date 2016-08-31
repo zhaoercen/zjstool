@@ -1,0 +1,41 @@
+<!DOCTYPE html><!--为每个 HTML 页面的第一行添加标准模式（standard mode）的声明，这样能够确保在每个浏览器中拥有一致的展现。-->
+<html lang="zh-CN"><!--强烈建议为 html 根元素指定 lang 属性，从而为文档设置正确的语言。这将有助于语音合成工具确定其所应该采用的发音，有助于翻译工具确定其翻译时所应遵守的规则等等。-->
+<head>
+	<!--通过明确声明字符编码，能够确保浏览器快速并容易的判断页面内容的渲染方式。这样做的好处是，可以避免在 HTML 中使用字符实体标记（character entity），从而全部与文档编码一致（一般采用 UTF-8 编码）。-->
+	<meta charset="UTF-8">
+	<!--除非有强烈的特殊需求，否则最好是设置为 edge mode，从而通知 IE 采用其所支持的最新的模式。-->
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<!--将该标签加入到页面中，可以让部分国产浏览器默认采用高速模式渲染页面：360浏览器支持-->
+	<meta name="renderer" content="webkit">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+	<link href="../css/bootstrap.css" rel="stylesheet">
+	<link href="../css/bootstrap-theme.css" rel="stylesheet">
+	<!--type默认值：type="text/css" ,可以不设置-->
+	<!--<link href="js/jquery-ui/jquery-ui-1.11.1.custom/jquery-ui.css" rel="stylesheet">-->
+
+	<!-- 自定义样式-->
+	<link href="../css/zjstool.css" rel="stylesheet">
+	<script src="../js/require/require.js" data-main="index.js"></script>
+	<title></title>
+</head>
+<body ms-controller="indexBodyC" style="overflow-y:scroll;padding-top: 70px;">
+<!--导航条默认高度70，导航浮动时，这里在body上面增加70的高度，防止被导航遮挡 -->
+
+	<!-- 导航条 -->
+	<nav class="navbar navbar-default  navbar-fixed-top"> <!-- navbar-static-top navbar-fixed-top-->
+		<div class="container">
+			<ul class="nav nav-pills">
+				<li role="presentation" class="active"><a href="#!/ztools">文本替换工具</a></li>
+				<li role="presentation"><a href="#!/jsbeautify">js格式化</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<!-- 模块加载区域。去掉iframe 改为动态加载页面模块 -->
+	<div  class="container-fluid" >
+		<div class="mainframe" ms-include-src="iframeUrl"></div>
+	</div>
+</body>
+</html>

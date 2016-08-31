@@ -1,0 +1,140 @@
+<div ms-controller="replaceTool">
+
+    <div class="container"><!-- container2 -->
+        <div class="row"><!--row1-->
+            <div class="col-md-3 col-sm-3 col-xs-3 col1">
+                <textarea class="form-control" rows="18" ms-duplex="col1Text"></textarea>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-3 col2" ms-visible="visibleCol2">
+                <textarea class="form-control" rows="18" ms-duplex="col2Text"></textarea>
+            </div>
+            <div ms-class-1="col3" ms-class-2="col-md-9 col-sm-9 col-xs-9:!visibleCol2"
+                 ms-class-3="col-md-6 col-sm-6 col-xs-6:visibleCol2">
+                <textarea class="form-control" rows="18" ms-attr-value="resultText"></textarea>
+                <!-- 数据行数 $("textarea")[2].value.split("\n")-->
+            </div>
+        </div>
+
+        <div class="row"><!--row2-->
+            <div class="col-md-3 col-sm-3 col-xs-3 col1">
+                <ul class="list-inline ul-m-tb5">
+                    <li><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="#{aA}"
+                           ms-click="btnClick('aA')" role="button">大写4</a></li>
+                    <li><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="#{aa}"
+                           ms-click="btnClick('aa')" role="button">小写5</a></li>
+                    <li>
+                        <small>Ctrl+1/2/3/4/5</small>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-3 col2" ms-visible="visibleCol2">
+                <ul class="list-inline ul-m-tb5">
+                    <li><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="#{bA}"
+                           ms-click="btnClick('bA')" role="button">大写4</a></li>
+                    <li><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="#{ba}"
+                           ms-click="btnClick('ba')" role="button">小写5</a></li>
+                    <li>
+                        <small>Alt+1/2/3/4/5</small>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6 col3">
+                <ul class="list-inline ul-m-tb5">
+                    <li><a class="btn btn-success btn-sm" ms-click="showDoubleCol()" role="button">{{showDoubleColText}}</a></li>
+                    <li ms-visible="explain.show">
+                        <a tabindex="0" class="btn btn-sm btn-warning" role="button"
+                           data-toggle="popover" data-trigger="focus"
+                           ms-attr-title="{{explain.title}}"
+                           ms-attr-data-content="{{explain.contain}}">{{explain.btnText}}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row"><!--row3-->
+            <div class="col-md-3 col-sm-3 col-xs-3 col1">
+                <ul class="list-inline ul-b">
+                    <li><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="#{as}"
+                           ms-click="btnClick('as')" role="button">原值1</a></li>
+                    <li><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="#{ad}"
+                           ms-click="btnClick('ad')" role="button">驼峰2</a></li>
+                    <li><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="#{ac}"
+                           ms-click="btnClick('ac')" role="button">反驼3</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-3 col2" ms-visible="visibleCol2">
+                <ul class="list-inline ul-b">
+                    <li><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="#{bs}"
+                           ms-click="btnClick('bs')" role="button">原值1</a></li>
+                    <li><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="#{bd}"
+                           ms-click="btnClick('bd')" role="button">驼峰2</a></li>
+                    <li><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="#{bc}"
+                           ms-click="btnClick('bc')" role="button">反驼3</a></li>
+                </ul>
+            </div>
+            <div ms-class-1="col3" ms-class-2="col-md-6 col-sm-6 col-xs-6">
+                <ul class="list-inline ul-b">
+                    <li><a class="btn btn-success btn-sm" ms-click="textChange()" role="button">替换</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row"><!--row4-->
+            <div class="col-md-12">
+                <textarea id="txt_rule" class="form-control" rows="2" ms-duplex="ruleText"></textarea>
+            </div>
+        </div>
+
+        <div class="row"><!--row5-->
+            <div class="col-md-12">
+                <ul class="list-inline ul-b">
+                    <li><a class="btn btn-success btn-sm" data-toggle="modal" data-target="#myModal" role="button" ms-click="onclickSaveAs">保存为常用规则</a></li>
+                    <li ms-repeat="savedRuleArr" ms-if-loop="el">
+                        <a class="btn btn-info btn-sm" role="button" ms-click="onclickUseRule(el.ruleTitle)">{{el.ruleTitle}}</a>
+                        <button type="button" class="close" aria-label="Delete" ms-click="onclickDelRule(el.ruleTitle)">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </li>
+                    <!--TODO 增加导入导出 avalon.store.get("savedRuleArrVal") -->
+                    <div class="btn-group dropup" style="display: none">
+                        <button type="button" class="btn btn-sm btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            导出导入规则 <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" class="">从系统导出（未实现）</a></li>
+                            <li><a href="#" class="">从外部导入（未实现）</a></li>
+                            <!-- <li role="separator" class="divider"></li> 分割线-->
+                        </ul>
+                    </div>
+                    <li><a class="btn btn-danger btn-sm"  role="button" ms-click="onclickDelAllRule()">清空所有规则</a></li>
+                </ul>
+            </div>
+        </div>
+    </div><!-- container2 end-->
+
+    <!-- Modal 保存规则-->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-md" role="document"><!--弹出位置 style="margin-top: 300px" -->
+            <div class="modal-content">
+                <div class="modal-header form-group has-success">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <label class="control-label" >名称：</label><input type="text" class="form-control" ms-duplex="saveRuleTitle">
+                </div>
+                <div class="modal-body form-group has-success">
+                    <label class="control-label"> 规则：<h4>{{ruleText}}</h4></label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <a id="btn_saveRule" class="btn btn-primary"  role="button" tabindex="-1"
+                       data-toggle="popover" data-placement="top" data-trigger="focus"
+                       title="保存失败" data-content="1">
+                        保存规则
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div><!-- Modal 保存规则 end -->
+</div>
+<script src="ztools.js"></script>

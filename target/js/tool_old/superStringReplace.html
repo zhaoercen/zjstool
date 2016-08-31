@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<!--[if IE 7 ]><html class="ie ie7" lang="en"><![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"><![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="en">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<title>superStringReplace</title>
+<link type="text/css" href="../js/jquery-ui-1.11.1.custom/jquery-ui.css"
+	rel="stylesheet">
+<style>
+body {
+	font: 60% "Trebuchet MS", sans-serif; /*设置整体字体大小 CH*/
+	font: 75% "Trebuchet MS", sans-serif\0/; /*设置整体字体大小 IE 9 10*/
+	margin: 5px; /*边距*/
+}
+
+.radioset {
+	font-size: x-small;
+}
+
+.z-btns {
+	font-size: x-small;
+}
+
+.td-top {
+	vertical-align: top;
+}
+
+.allWidth {
+	width: 100%;
+}
+
+.hint-text {
+	/*提示框风格 css注释不能用双斜线 */
+	background-color: #FFCC66;
+	border: 3px solid;
+	border-radius: 10px;
+	border-color: #FF6666;
+}
+</style>
+
+<!-- 先加载基本的js库 -->
+<script src="../js/jquery/jquery-1.8.3.js"></script>
+<script src="../js/jquery-ui-1.11.1.custom/jquery-ui.js"></script>
+<script src="../js/knockout/knockout-3.2.0.js"></script>
+
+<!-- 然后加载zjt -->
+<script src="../js/zjt/objtool.js"></script>
+<script src="../js/zjt/strtool.js"></script>
+<script src="../js/zjt/logtool.js"></script>
+<script src="../js/zjt/util.js"></script>
+
+<!-- 最后加载业务模块的js -->
+<script src="superStringReplace.js"></script>
+
+
+<script>
+	var tabs;
+	
+	$(function() {
+		init();
+	});
+	function init() {
+		console.info("%c 287543566@qq.com %c 不知不觉 %c 欢迎你！", "color:red",
+				"color:blue", "color:green");
+		
+		document.onkeydown = keyDownEvent;
+			
+			
+		//替换规则的提示信息
+		var divRuleDeclare = $("#divRuleDeclare");
+		divRuleDeclare.html(divRuleDeclare.html() + initRuleDeclare());
+		//divRuleDeclare.css("height","120");
+		divRuleDeclare.addClass("hint-text");
+
+		//指定log输出的div
+		uuidObj.setDiv("uuidOut");
+
+		//jqueryUI控件初始化
+		$("#uuidUpper").buttonset();
+		$("#uuidSplit").buttonset();
+		$(".radioset").buttonset();
+		$("button").button();
+		tabs = $(".jqueryUI-tabs");
+		tabs.tabs();
+		//addParam();
+
+		//更新UUID的radio控件的值
+		$("input:radio[name=uuidUpper]").on("click", function() {
+			uuidObj.uuidUpper = $(this).val();
+		});
+		$("input:radio[name=uuidSplit]").on("click", function() {
+			uuidObj.uuidSplit = $(this).val();
+		});
+	}
+	
+	//获取所选中的Tab页序号，从0开始，0、1、2...
+	function getSelectTab(){
+		return tabs.tabs('option','active');
+	}
+	
+	function keyDownEvent(event){
+		if(getSelectTab() == "0"){
+			if(event.altKey || event.ctrlKey){
+				if(window.event.keyCode == 49){
+						ruleInsert('source');
+				}else if(window.event.keyCode ==50){
+					ruleInsert('A');
+				}
+				else if(window.event.keyCode ==51){
+					ruleInsert('a');
+				}
+				else if(window.event.keyCode ==52){
+					ruleInsert('aBToA_B');
+				}
+				else if(window.event.keyCode ==53){
+					ruleInsert('A_BToaB');
+				}else{
+					return true;//不能阻塞其它快捷键，比如ctr+c,v
+				}
+				return false;//阻塞浏览器的快捷键
+			}
+		}
+		if(getSelectTab() == "1"){
+			var areaType = "";
+			if(event.ctrlKey){
+				areaType = "a";
+			} else if (event.altKey){
+				areaType = "b";
+			}
+			if(areaType != ""){
+				if(window.event.keyCode == 49){
+					tab2_ruleInsert(areaType,'s');
+				}else if(window.event.keyCode ==50){
+					tab2_ruleInsert(areaType,'A');
+				}
+				else if(window.event.keyCode ==51){
+					tab2_ruleInsert(areaType,'a');
+				}
+				else if(window.event.keyCode ==52){
+					tab2_ruleInsert(areaType,'c');
+				}
+				else if(window.event.keyCode ==53){
+					tab2_ruleInsert(areaType,'d');
+				}else{
+					return true;//不能阻塞其它快捷键，比如ctr+c,v
+				}
+				return false;
+			}
+		}
+		
+	}
+	
+	
+	//Tab1=======================================================
+
+	//批量替换-对每行进行批量替换
+	function beginReplaceEachRow() {
+		var _source = $("#txt_template").val();//原始数据 ☆从控件获取
+		var _txtrule = $("#txt_rule").val();//替换规则 ☆从控件获取
+		var result = "";//返回结果
+
+		//a.原始数据没数据
+		if (_source == "") {
+			$("#txt_result").val(_txtrule);
+			return;
+		}
+		//b.原始数据有数，没替换规则
+		if (_source != "" && _txtrule == "") {
+			$("#txt_result").val(_source);
+			return;
+		}
+
+		//分析替换规则中要被替换的部分
+		var repArrOfRule = getRepArrOfRule(_txtrule);
+
+		//c.没有可替换的规则
+		if (repArrOfRule == null) {
+			$("#txt_result").val(_txtrule);
+			return;
+		}
+		//循环将原信息的每一行的进行替换
+		//word：原数据的单独一行（看作一个单词）
+		//_txtrule：按此规则替换
+		//repArrOfRule：所需替换的标记
+		$.each(_source.split("\n"), function(i, word) {
+			result += bacthReplace(word, _txtrule, repArrOfRule) + "\n";
+		});
+		$("#txt_result").val(result);// ☆赋值给控件
+	}
+
+	//批量替换-从替换规则中获取需要替换的字符串 返回数组
+	function getRepArrOfRule(txtRule) {
+		var reg = new RegExp("#\{[^{]*\?}", "g");
+		return txtRule.match(reg);
+	}
+
+	//批量替换-对要替换的字符串进行替换
+	//word：原数据的单独一行
+	//_txtrule：按此规则替换
+	//repArrOfRule：所需替换的标记数组
+	function bacthReplace(word, txtrule, repArrOfRule) {
+		var newRow = "" + txtrule;
+		for ( var i = 0; i < repArrOfRule.length; i++) {
+			var hasReplace = false;//是否已经替换过repArrOfRule[i]对应的替换标记
+			for ( var j = 0; j < i; j++) {
+				//用双层循环是为了在出现同样的替换标记时，不多次进行同样的替换
+				if (repArrOfRule[j] == repArrOfRule[i]) {
+					hasReplace = true;
+					break;
+				}
+			}
+			if (hasReplace) {
+				continue; //跳过在repArrOfRule[i]之前出现过的替换标记
+			}
+			for ( var mi = 0; mi < zjt.strtool.swcMode.length; mi++) {
+				var swcMode = zjt.strtool.swcMode[mi];//swcMode的一个对象
+				var alias = swcMode.alias;//swcMode中的alias（是一个数组）
+				var replaced = false;//已经替换
+				for ( var mai = 0; mai < alias.length; mai++) {
+					if ("#{" + alias[mai] + "}" == repArrOfRule[i]) {
+						newRow = newRow.replace(
+								new RegExp(repArrOfRule[i], "g"), zjt.strtool
+										.swcStr(word, swcMode.mode));
+						replaced = true;
+						break;
+					}
+				}
+				if (replaced) {
+					break;
+				}
+			}
+		}
+		return newRow;
+	}
+
+	//批量替换-获取替换规则的描述信息
+	function initRuleDeclare() {
+		var msg = "";
+		msg += "可用的规则<br>";
+		$
+				.each(
+						zjt.strtool.swcMode,
+						function(i, n) {
+							//msg += "<div style=\"display:inline;font-size:100%;color:crimson;\">#{" + n.mode + "}";
+							//n.alias && (msg += "、#{" + n.alias +"}");//补上别名
+							msg += "<div style=\"display:inline;font-size:100%;color:crimson;\">";
+							$.each(n.alias, function(j, m) {
+								msg += "#{" + m + "} ";
+							});
+							msg += "</div>";
+							msg += " " + n.description + "<br>";
+						});
+		return msg;
+	}
+
+	function ruleInsert(obj) {
+		var txtAreaRule = $("#txt_rule");
+		var ruleText = $("#txt_rule").val();
+		var selectionStart = $("#txt_rule")[0].selectionStart;//光标起始位置
+		var selectionEnd = $("#txt_rule")[0].selectionEnd;//光标结束位置
+		
+		var resultText = "";//最终得到的文本
+		var opText = whileInsert(obj);//需要插入或替换为的字符
+		
+		//没有选择的时候，在光标位插入。选择的时候，替换掉选择位置的字符
+		//这里不需要区分是插入还是替换
+		//ruleText.substring(selectionStart,selectionEnd) 所选择的字符串
+		//等价于 ruleText.substr(selectionStart,selectionEnd-selectionStart)
+		resultText += ruleText.substring(0,selectionStart);
+		resultText += opText;
+		resultText += ruleText.substring(selectionEnd);
+		
+		$("#txt_rule").val(resultText);
+		$("#txt_rule")[0].selectionStart = selectionStart+opText.length;
+		$("#txt_rule")[0].selectionEnd = selectionStart+opText.length;
+	}
+	
+	function whileInsert(obj){
+		switch(obj){
+		case "A":return "#{A}";
+		case "a":return "#{a}";
+		case "source":
+		case "s":return "#{s}";
+		case "aBToA_B":
+		case "c":return "#{c}";
+		case "A_BToaB":
+		case "d":return "#{d}";
+		}
+	}
+	//Tab2=======================================================
+	//add 第一组 和 第二组 每行相加
+	function addFirstAndSecond() {
+		var addFirst = $("#txt_addFirst").val();
+		var addSecond = $("#txt_addSecond").val();
+		var addRule = $("#txt_addRule").val();
+		var addResult = "";
+		var addRowNum = "";//行号
+
+		var addFirstArr = addFirst.split("\n");
+		var addSecondArr = addSecond.split("\n");
+
+		var flag = true;
+		var i = 0;
+		while (flag) {
+			var aN = "";
+			var bN = "";
+			var rN = "";
+
+			if (i >= addFirstArr.length && i >= addSecondArr.length) {
+				break;
+			}
+			if (i < addFirstArr.length) {
+				aN = addFirstArr[i];
+			}
+			if (i < addSecondArr.length) {
+				bN = addSecondArr[i];
+			}
+			addRowNum += zjt.strtool.lpad((i + 1) + "", 4, " ") + ".\n";//行号
+			i++;
+
+			//替换规则
+			if (addRule != "") {
+				rN = addRule.replace(new RegExp("#\{a\}", "g"), aN);
+				rN = rN.replace(new RegExp("#\{as\}", "g"), zjt.strtool.swcStr(aN, "s"));//a大写
+				rN = rN.replace(new RegExp("#\{aA\}", "g"), zjt.strtool.swcStr(aN, "A"));//a大写
+				rN = rN.replace(new RegExp("#\{aa\}", "g"), zjt.strtool.swcStr(aN, "a")); //a小写
+				rN = rN.replace(new RegExp("#\{ac\}", "g"), zjt.strtool.swcStr(aN, "c"));//a反驼峰
+				rN = rN.replace(new RegExp("#\{ad\}", "g"), zjt.strtool.swcStr(aN, "d"));//a驼峰
+					
+				rN = rN.replace(new RegExp("#\{b\}", "g"), bN);	
+				rN = rN.replace(new RegExp("#\{bs\}", "g"), zjt.strtool.swcStr(bN, "s"));//a大写
+				rN = rN.replace(new RegExp("#\{bA\}", "g"), zjt.strtool.swcStr(bN, "A"));//a大写
+				rN = rN.replace(new RegExp("#\{ba\}", "g"), zjt.strtool.swcStr(bN, "a")); //a小写
+				rN = rN.replace(new RegExp("#\{bc\}", "g"), zjt.strtool.swcStr(bN, "c"));//a反驼峰
+				rN = rN.replace(new RegExp("#\{bd\}", "g"), zjt.strtool.swcStr(bN, "d"));//a驼峰
+				
+			} else {
+				rN = aN + bN;
+			}
+			addResult += rN + "\n";
+		}
+
+		$("#txt_addRowNum").val(addRowNum);
+		$("#txt_addResult").val(addResult);
+	}
+
+	function synScroll() {//同步滚动条高度
+		var _value = $("#txt_addResult").scrollTop();
+		$("#txt_addRowNum").scrollTop(_value);
+		$("#txt_addFirst").scrollTop(_value);
+		$("#txt_addSecond").scrollTop(_value);
+	}
+	
+	function tab2_ruleInsert(areaType,replaceType){
+		var txtAreaRule = $("#txt_addRule");
+		var ruleText = $("#txt_addRule").val();
+		var selectionStart = $("#txt_addRule")[0].selectionStart;//光标起始位置
+		var selectionEnd = $("#txt_addRule")[0].selectionEnd;//光标结束位置
+		var resultText = "";//最终得到的文本
+		var opText = "";
+		
+		if(areaType == "a"){
+			opText = "#{a"+ replaceType +"}";
+		}else if(areaType == "b"){
+			opText = "#{b"+ replaceType +"}";
+		}else{
+			//do nothing
+		}
+		
+		resultText += ruleText.substring(0,selectionStart);
+		resultText += opText;
+		resultText += ruleText.substring(selectionEnd);
+		
+		$("#txt_addRule").val(resultText);
+		$("#txt_addRule")[0].selectionStart = selectionStart+opText.length;
+		$("#txt_addRule")[0].selectionEnd = selectionStart+opText.length;
+	}
+	
+
+	
+	function demo(tab){
+		if(getSelectTab() == '0'){
+			if($("#txt_template").val()==""){
+				$("#txt_template").val("TABLE_Colume");
+				$("#txt_rule").val("原值：#{s} \n大写：#{A}\n小写：#{a}\n驼峰：#{d}");
+				beginReplaceEachRow();
+			}else{
+				$("#txt_template").val("");
+				$("#txt_rule").val("");
+			}
+		}
+		if(getSelectTab() == '1'){
+			if($("#txt_addFirst").val()=="" && $("#txt_addSecond").val()==""){
+				$("#txt_addFirst").val("TABLE");
+				$("#txt_addSecond").val("Colume");
+				$("#txt_addRule").val("#{a} + #{b} = #{a} _ #{b}");
+				addFirstAndSecond();
+			}else{
+				$("#txt_addFirst").val("");
+				$("#txt_addSecond").val("");
+				$("#txt_addRule").val("");
+			}
+		}
+	
+	}
+	
+	
+	//Tab 格式化JS
+	function modifyJsFormatPage(){
+		var jsformatPage = $("#ifrm_jsformat");
+	}
+	
+</script>
+</head>
+<body>
+	<div id="tabs" class="jqueryUI-tabs" style="height: 100%">
+		<ul>
+			<li><a href="#tabs-1">批量替换</a></li>
+			<li><a href="#tabs-2">多行分别相加</a></li>
+			<li><a href="#tabs-3">UUID</a></li>
+			<li><a href="#tabs-sqlMaker">SQL语句</a></li>
+			<li><a href="#tabs-jsFormat">Js格式化</a></li>
+		</ul>
+		<div id="tabs-1">
+			<table class="allWidth">
+				<tr>
+					<!-- html方式 valign="top"  浏览器不一定支持， css方式 vertical-align:top 更好-->
+					<td class="td-top" style="width: 430px;">
+						<div>
+							<textarea id="txt_template" rows="20" cols="80"></textarea>
+						</div>
+						<div>将上面每行替换为下面的模板</div>
+						<div>
+							<textarea id="txt_rule" rows="5" cols="80"></textarea>
+						</div>
+						<div>
+							<button class="z-btns" onClick="ruleInsert('source')"><font color="red">1</font>.原值s</button>
+							<button class="z-btns" onClick="ruleInsert('A')"><font color="red">2</font>.大写A</button>
+							<button class="z-btns" onClick="ruleInsert('a')"><font color="red">3</font>.小写a</button>
+							<button class="z-btns" onClick="ruleInsert('aBToA_B')"><font color="red">4</font>.反驼峰c</button>
+							<button class="z-btns" onClick="ruleInsert('A_BToaB')"><font color="red">5</font>.驼峰d</button>
+						</div>
+						<div>快捷键CTRL/ALT + 1/2/3/4/5</div>
+					</td>
+					<td style=" vertical-align: top; padding-top: 120px;">
+						<div>
+							<button class="z-btns" onClick="beginReplaceEachRow()"> 替换 </button>
+						</div>
+					<td>
+					<td class="td-top" >
+						<div style="vertical-align: top">
+							<textarea id="txt_result" rows="30" cols="85"></textarea>
+						</div>
+					</td>
+					<td class="td-top" >
+						<div id="divRuleDeclare" class="hint-text"></div>
+						<button class="z-btns" onClick="demo('tab1')"> Demo </button>
+					<td>
+				</tr>
+			</table>
+		</div>
+		<div id="tabs-2">
+			<!--区域a和区域b的数据按每行相加-->
+			<table class="allWidth">
+				<tr>
+					<td class="td-top" style="width: 4%;display:none">
+						<div>行号</div> <textarea id="txt_addRowNum" rows="20" cols="4"
+							style="overflow: hidden;" readonly="readonly"></textarea>
+					</td>
+					<td class="td-top" style="width: 5%;">
+						<div>区域一（#{a}）</div> <textarea id="txt_addFirst" rows="20" cols="35"></textarea>
+					</td>
+					<td class="td-top" style="width: 5%;">
+						<div>区域二（#{b}）</div> <textarea id="txt_addSecond" rows="20" cols="35"></textarea>
+					</td>
+					<td class="td-top" colspan="2" style="width: 20%;">
+						<div>结果</div> <textarea id="txt_addResult" rows="20" cols="80"
+							onmouseup="synScroll()"></textarea>
+					</td>
+					<td class="td-top" style="width: 35%;">
+						<div class="hint-text">
+							区域一中的数据，原值为a<br>1<br>2<br> <br> 区域二中的数据，原值为b<br>a<br>b<br>
+							<br> 规则:#{a} + #{b} = ?（规则默认为#{a}#{b}）<br> 结果：<br>1
+							+ a = ?<br> 2 + b = ?<br>
+						</div>
+						<button class="z-btns" onClick="demo('tab2')"> Demo </button>
+					</td>
+				</tr>
+				<tr>
+					<td class="td-top" colspan="3" valign="top">规则：<br/> <textarea
+							id="txt_addRule" rows="2" cols="70"></textarea>
+					</td>
+					<td class="td-top">
+						<br/>
+						<button class="z-btns" onClick="addFirstAndSecond()">替换</button>
+					</td>
+					<td class="td-top" colspan="2"></td>
+				</tr>
+				<tr>
+					<td colspan="6">
+					快捷键：
+					</td>
+				</tr>
+				<tr>
+					<td colspan="5">
+						<button class="z-btns" onClick="tab2_ruleInsert('a','s')"><font color="red">1</font>.a的原值</button>
+						<button class="z-btns" onClick="tab2_ruleInsert('a','A')"><font color="red">2</font>.a的大写</button>
+						<button class="z-btns" onClick="tab2_ruleInsert('a','a')"><font color="red">3</font>.a的小写</button>
+						<button class="z-btns" onClick="tab2_ruleInsert('a','c')"><font color="red">4</font>.a的反驼峰</button>
+						<button class="z-btns" onClick="tab2_ruleInsert('a','d')"><font color="red">5</font>.a的驼峰</button>
+						<font color="red">Ctrl + 1/2/3/4/5</font>
+					</td>
+					<td class="td-top" colspan="1">
+					</td>
+				</tr>
+				<tr>
+					<td colspan="5">
+						<button class="z-btns" onClick="tab2_ruleInsert('b','s')"><font color="red">1</font>.b的原值</button>
+						<button class="z-btns" onClick="tab2_ruleInsert('b','A')"><font color="red">2</font>.b的大写</button>
+						<button class="z-btns" onClick="tab2_ruleInsert('b','a')"><font color="red">3</font>.b的小写</button>
+						<button class="z-btns" onClick="tab2_ruleInsert('b','c')"><font color="red">4</font>.b的反驼峰</button>
+						<button class="z-btns" onClick="tab2_ruleInsert('b','d')"><font color="red">5</font>.b的驼峰</button>
+						<font color="red">Alt + 1/2/3/4/5</font>
+					</td>
+					<td class="td-top" colspan="1">
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id="tabs-3">
+			<!-- 需要用knockout来绑定值  点JQueryUI的radio的时候不会真的修改radio的值-->
+			<button id="getUUID" class="jqueryUI-button"
+				onclick="uuidObj.getUUID(this)">获取UUID</button>
+			<button id="clearUUIDLog" class="jqueryUI-button"
+				onclick="uuidObj.clearUUIDLog(this)">清理</button>
+			<div id="uuidUpper" style="display: inline">
+				<input type="radio" id="uuidUpperN" name="uuidUpper" value="N"
+					checked="checked"><label for="uuidUpperN">小写</label> <input
+					type="radio" id="uuidUpperY" name="uuidUpper" value="Y"><label
+					for="uuidUpperY">大写</label>
+			</div>
+			<div id="uuidSplit" style="display: inline">
+				<input type="radio" id="uuidSplitY" name="uuidSplit" value="Y"
+					checked="checked"><label for="uuidSplitY">有分割线</label> <input
+					type="radio" id="uuidSplitN" name="uuidSplit" value="N"><label
+					for="uuidSplitN">无分割线</label>
+			</div>
+			<div id="uuidOut"></div>
+		</div>
+		<div id="tabs-sqlMaker">
+			<iframe src="sqlMaker.html" frameborder="0" width="100%" height="400">
+				<div>必须有div不然IE不显示</div>
+			</iframe>
+		</div>
+		<div id="tabs-jsFormat">
+			<iframe id="ifrm_jsformat" src="jsFormat.html" frameborder="0" width="100%" height="500">
+				<div>必须有div不然IE不显示</div>
+			</iframe>
+		</div>
+	</div>
+</body>
+</html>

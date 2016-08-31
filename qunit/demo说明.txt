@@ -1,0 +1,2 @@
+1、直接用浏览器打开qunit.html可以看demo效果。
+2、测试用例的demo：testCase.js。自己需要仿照这个demo写测试用例。

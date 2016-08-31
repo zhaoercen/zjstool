@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!--[if IE 7 ]><html class="ie ie7" lang="en"><![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"><![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="en">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<title>sqlMaker</title>
+<link type="text/css" href="../js/jquery-ui-1.11.1.custom/jquery-ui.css"
+	rel="stylesheet">
+<style>
+body {
+	font: 60% "Trebuchet MS", sans-serif; /*设置整体字体大小 CH*/
+	font: 75% "Trebuchet MS", sans-serif\0/; /*设置整体字体大小 IE 9 10*/
+	margin: 5px; /*边距*/
+}
+
+.radioset {
+	font-size: x-small;
+}
+
+.z-btns {
+	font-size: small;
+}
+
+.td-top {
+	vertical-align: top;
+}
+
+.allWidth {
+	width: 100%;
+}
+
+.z_lable{
+	font-size: medium; 
+	text-align:right;
+	display: inline-block;
+	width: 90px;
+}
+
+.hint-text {
+	/*提示框风格 css注释不能用双斜线 */
+	background-color: #FFCC66;
+	border: 3px solid;
+	border-radius: 10px;
+	border-color: #FF6666;
+}
+</style>
+
+<!-- 先加载基本的js库 -->
+<script src="../js/jquery/jquery-1.8.3.js"></script>
+<script src="../js/jquery-ui-1.11.1.custom/jquery-ui.js"></script>
+<script src="../js/knockout/knockout-3.2.0.js"></script>
+
+<!-- 然后加载zjt -->
+<script src="../js/zjt/objtool.js"></script>
+<script src="../js/zjt/strtool.js"></script>
+<script src="../js/zjt/logtool.js"></script>
+<script src="../js/zjt/util.js"></script>
+
+<!-- 最后加载业务模块的js -->
+<script src="sqlMaker.js"></script>
+</head>
+<body>
+	<table id="allTable" style="width:100%" border="0">
+	<tr>
+		<td style="width:25%;" valign="top" align="left">
+			<table>
+				<tr>
+					<td>
+						<div class="z_lable">列名</div>
+					</td>
+					<td>
+						<textarea id="txt_colName" rows="10" cols="20" style="width:180px" data-bind="value:columns"></textarea>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="z_lable">表名</div>
+					</td>
+					<td>
+						<input id="txt_tabName" style="width:180px" data-bind="value:tableName">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="z_lable">表别名</div>
+					</td>
+					<td>
+						<input id="txt_tabAlias" style="width:180px" data-bind="value:tabAlias">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="z_lable">生成语句</div>
+						</td>
+					<td>
+						<select id="sqlType" style="width:140px"
+						data-bind="options:sqlTypes, optionsText:'dictName', optionsValue:'dictId', value:sqlType">
+						</select>
+					</td>
+				</tr>	
+				<tr>
+					<td>
+						<div class="z_lable">变量格式</div>
+					</td>
+					<td>
+						<select id="varFormat" style="width:140px" data-bind="value:varFormat">
+							<option value="hump">驼峰</option>
+							<option	value="upper">列名（大写）</option>
+							<option value="lower">列名（小写）</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="z_lable">变量类型</div>
+					</td>
+					<td>
+						<select id="varType" style="width:140px" data-bind="value:varType">
+							<option value="mybatis">#{variable}</option>
+							<option value="normal">variable</option>
+							<option value="nowhere">无Where条件</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+		</td>
+		<td>
+			<textarea id="txt_result" rows="25" cols="65" data-bind="value:sqlResult"></textarea>	
+		</td>
+	</tr>
+	</table>
+	
+	
+	
+</body>
+</html>

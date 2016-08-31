@@ -1,0 +1,21 @@
+body {
+    background: #ecf9fe; /*底色，灰色:f9fafe*/
+}
+
+/* 对bootstrap的样式覆盖 */
+.ul-m-tb5 {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.ul-b {
+    margin-bottom: 5px;
+}
+
+/* 对bootstrap的样式覆盖 end */
+
+
+.ms-controller, .ms-important, [ms-controller], [ms-important] {
+    visibility: hidden;
+}
+
